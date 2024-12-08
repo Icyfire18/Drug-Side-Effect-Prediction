@@ -1,0 +1,37 @@
+[
+    {
+        "model":"CatBoost",
+        "accuracy":0.752,
+        "precision":0.7002669031,
+        "recall":0.752,
+        "f1_score":0.7105401248
+    },
+    {
+        "model":"LightBoost",
+        "accuracy":0.8986666667,
+        "precision":0.8985584803,
+        "recall":0.8986666667,
+        "f1_score":0.8862522787
+    },
+    {
+        "model":"AdaBoost",
+        "accuracy":0.4933333333,
+        "precision":0.3349823219,
+        "recall":0.4933333333,
+        "f1_score":0.3571497301
+    },
+    {
+        "model":"XGBoost",
+        "accuracy":0.8533333333,
+        "precision":0.9144920248,
+        "recall":0.8533333333,
+        "f1_score":0.8380926375
+    },
+    {
+        "model":"RandomForest",
+        "accuracy":0.6213333333,
+        "precision":0.6008266465,
+        "recall":0.6213333333,
+        "f1_score":0.5532411125
+    }
+]

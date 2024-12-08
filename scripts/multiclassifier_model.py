@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
-from collections import defaultdict
 from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 import xgboost as xgb
@@ -109,6 +110,62 @@ def save_results(model, label_encoder, accuracy, report, save_path="model"):
     
     print(f"Model, label encoder, and results saved to {save_path}/")
 
+def train_and_evaluate_models(pivot_df):
+    # Prepare feature matrix X and labels y
+    X = pivot_df.dropna(axis=1, how='all').values
+    y = pivot_df.idxmax(axis=1).values  # Using the most frequent side effect as the label
+    
+    # Encode labels
+    label_encoder = LabelEncoder()
+    y_encoded = label_encoder.fit_transform(y)
+    
+    # Split data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
+        
+    # Initialize models
+    models = {
+        'RandomForest': RandomForestClassifier(n_estimators=100, random_state=42),
+        'LogisticRegression': LogisticRegression(max_iter=500, random_state=42)
+    }
+    
+    results = {}
+    
+    for model_name, model in models.items():
+        print(f"\nTraining {model_name}...")
+        
+        # Train model
+        model.fit(X_train, y_train)
+        
+        # Make predictions
+        y_pred = model.predict(X_test)
+        
+        # Evaluate
+        accuracy = accuracy_score(y_test, y_pred)
+        report = classification_report(y_test, y_pred, output_dict=True)
+        
+        # Save results
+        results[model_name] = {
+            'model': model,
+            'accuracy': accuracy,
+            'classification_report': report
+        }
+    
+    return results, label_encoder, X_test, y_test
+
+def compare_models(results, label_encoder, y_test):
+    # Decoding target labels
+    y_test_decoded = label_encoder.inverse_transform(y_test)
+    
+    print("\n--- Model Comparison ---")
+    for model_name, result in results.items():
+        print(f"\n{model_name} Performance:")
+        print(f"Accuracy: {result['accuracy']:.3f}")
+        print(f"Precision: {result['classification_report']['weighted avg']['precision']:.3f}")
+        print(f"Recall: {result['classification_report']['weighted avg']['recall']:.3f}")
+        print(f"F1-Score: {result['classification_report']['weighted avg']['f1-score']:.3f}")
+        
+
+
 def main():
     side_effects_df, drug_names_df = load_data()
     print("Data Loaded")
@@ -116,32 +173,39 @@ def main():
     print("Preprocessing data...")
     pivot_df = preprocess_data(side_effects_df, drug_names_df)
 
-    print("Training the model...")
-    model, y_test, y_pred, accuracy, report, label_encoder = train_multiclass_model(pivot_df)
+    print("Training and Evaluating Models...")
+    results, label_encoder, X_test, y_test = train_and_evaluate_models(pivot_df)
+    
+    compare_models(results, label_encoder, y_test)
 
-    print("Saving Model")
-    save_results(model, label_encoder, accuracy, report)
+    # print("Training the model...")
+    # model, y_test, y_pred, accuracy, report, label_encoder = train_multiclass_model(pivot_df)
+
+    # print("Saving Model")
+    # save_results(model, label_encoder, accuracy, report)
     
     # Decoding target labels to the original side effect names
-    y_test_decoded = label_encoder.inverse_transform(y_test)
-    y_pred_decoded = label_encoder.inverse_transform(y_pred)
+    # y_test_decoded = label_encoder.inverse_transform(y_test)
+    # y_pred_decoded = label_encoder.inverse_transform(y_pred)
     
-    print("\n--- Classification Results ---")
-    print("\nOverall Performance Metrics:")
-    print(f"Accuracy:  {accuracy:.3f}")
-    print(f"Precision: {report['weighted avg']['precision']:.3f}")
-    print(f"Recall:    {report['weighted avg']['recall']:.3f}")
-    print(f"F1-Score:  {report['weighted avg']['f1-score']:.3f}")
-    print(f"Total samples (support): {int(report['weighted avg']['support'])}")
+    if False:
 
-    if 1==2:
-        print("\n--- Detailed Classification Results ---")
-        print(f"Accuracy: {accuracy:.2f}")
-        print("Classification Report:")
-        print(classification_report(y_test_decoded, y_pred_decoded))
-        
-        print("\n--- Detailed Model Insights ---")
-        print(f"Model Evaluation Metrics: {report}")
+        print("\n--- Classification Results ---")
+        print("\nOverall Performance Metrics:")
+        print(f"Accuracy:  {accuracy:.3f}")
+        print(f"Precision: {report['weighted avg']['precision']:.3f}")
+        print(f"Recall:    {report['weighted avg']['recall']:.3f}")
+        print(f"F1-Score:  {report['weighted avg']['f1-score']:.3f}")
+        print(f"Total samples (support): {int(report['weighted avg']['support'])}")
+
+        if 1==2:
+            print("\n--- Detailed Classification Results ---")
+            print(f"Accuracy: {accuracy:.2f}")
+            print("Classification Report:")
+            print(classification_report(y_test_decoded, y_pred_decoded))
+            
+            print("\n--- Detailed Model Insights ---")
+            print(f"Model Evaluation Metrics: {report}")
 
 if __name__ == "__main__":
     main()
