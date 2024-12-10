@@ -1,15 +1,13 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import xgboost as xgb
 import pickle
 import json
 
 
-
 def load_model_and_results(model_path="model"):
     """Load the saved model, label encoder, and results"""
-    with open(f"{model_path}/drug_side_effects_model.pkl", "rb") as f:
+    with open(f"{model_path}/drug_side_effects_lightGBM_model.pkl", "rb") as f:
         model_dict = pickle.load(f)
         model = model_dict['model']
         label_encoder = model_dict['label_encoder']
@@ -84,7 +82,7 @@ def predict_drug_combinations(drug1, model, label_encoder, side_effects_df, drug
         feature_vector = create_feature_vector(drug1_ses, drug2_ses, all_side_effects)
         
         # Get model prediction
-        dmatrix = xgb.DMatrix(feature_vector.reshape(1, -1))
+        dmatrix  = feature_vector.reshape(1, -1)
         prediction = model.predict(dmatrix)[0]
         severity_score = float(prediction) / len(label_encoder.classes_) * 100
         
@@ -131,8 +129,6 @@ def drug_recommendation_app():
             with st.expander("View Side Effects"):
                 st.write(", ".join(drug1_ses))
             
-
-
             # Button for prediction
             if st.button("Predict Drug"):
 
@@ -193,7 +189,6 @@ def main():
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
         st.write("Please make sure the model and data files are properly loaded.")
-
 
 
 if __name__ == "__main__":

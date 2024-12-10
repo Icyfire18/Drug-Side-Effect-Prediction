@@ -29,9 +29,9 @@
     },
     {
         "model":"RandomForest",
-        "accuracy":0.6213333333,
-        "precision":0.6008266465,
-        "recall":0.6213333333,
-        "f1_score":0.5532411125
+        "accuracy":0.6346666667,
+        "precision":0.588057028,
+        "recall":0.6346666667,
+        "f1_score":0.565500003
     }
 ]
