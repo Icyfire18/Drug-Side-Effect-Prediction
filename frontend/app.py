@@ -182,8 +182,8 @@ def drug_recommendation_app():
 
 def main():
     st.set_page_config(layout="wide")
-    st.title("Drug Side Effects Analysis")
-
+    st.title("Drug Recommendation System")
+    st.toast("This is a testing environment. The results may not be accurate and should not be used for medical decisions.", icon="🚨")
     try:
         drug_recommendation_app()
     except Exception as e:
